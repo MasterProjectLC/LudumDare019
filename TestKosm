@@ -1,0 +1,108 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class KosmAttack : MonoBehaviour
+{
+    public Canvas ui;
+    public GameObject strongLight;
+    public GameObject flash;
+    private CameraController theCamera;
+    public RespawnManager respawnManager;
+    private Vector2 delta;
+    private float distance;
+    private Vector2 direction;
+    private float angle;
+    private float localAngle;
+    public int maxCharge = 60;
+    public int charge = 0;
+
+    public GameObject[] moduleList;
+
+    // Use this for initialization
+    void Start()
+    {
+        ui.gameObject.SetActive(true);
+        ui.GetComponent<UIManager>().activeCharacter = gameObject;
+        theCamera = FindObjectOfType<CameraController>();
+        theCamera.GetComponent<CameraController>().followTarget = gameObject;
+        respawnManager.thePlayer = gameObject;
+    }
+
+    void OnEnable()
+    {
+        ui.gameObject.SetActive(true);
+        ui.GetComponent<UIManager>().activeCharacter = gameObject;
+        theCamera = FindObjectOfType<CameraController>();
+        theCamera.GetComponent<CameraController>().followTarget = gameObject;
+        respawnManager.thePlayer = gameObject;
+        moduleList[0].transform.position = transform.position + new Vector3(0f, -2f, 0f);
+        moduleList[1].transform.position = transform.position + new Vector3(-2f, 0f, 0f);
+        moduleList[2].transform.position = transform.position + new Vector3(0f, 2f, 0f);
+        moduleList[3].transform.position = transform.position + new Vector3(2f, 0f, 0f);
+        distance = 2f;
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+
+        // Increase Radius
+        if (Input.GetMouseButton(0))
+        {
+
+            for (int i = 0; i <= moduleList.Length-1; i++)
+            {
+                distance = Mathf.Sqrt(Mathf.Pow(moduleList[i].transform.position.x - transform.position.x, 2) + Mathf.Pow(moduleList[i].transform.position.y - transform.position.y, 2));
+                if (distance < 5.5f)
+                {
+                    moduleList[i].transform.position += new Vector3((((distance + 0.1f) * (moduleList[i].transform.position.x - transform.position.x)) / distance) - (moduleList[i].transform.position.x - transform.position.x),
+                        (((distance + 0.1f) * (moduleList[i].transform.position.y - transform.position.y)) / distance) - (moduleList[i].transform.position.y - transform.position.y), 0f);
+                }
+            }
+        }
+
+        // Reduce Radius
+        if (Input.GetMouseButton(1))
+        {
+
+
+            for (int i = 0; i <= moduleList.Length - 1; i++)
+            {
+                distance = Mathf.Sqrt(Mathf.Pow(moduleList[i].transform.position.x - transform.position.x, 2) + Mathf.Pow(moduleList[i].transform.position.y - transform.position.y, 2));
+                if (distance > 1.5f)
+                {
+                    moduleList[i].transform.position += new Vector3((((distance - 0.1f) * (moduleList[i].transform.position.x - transform.position.x)) / distance) - (moduleList[i].transform.position.x - transform.position.x),
+                        (((distance - 0.1f) * (moduleList[i].transform.position.y - transform.position.y)) / distance) - (moduleList[i].transform.position.y - transform.position.y), 0f);
+                }
+            }
+        }
+
+        // Speed Up Rotation
+        if (Input.GetKey(KeyCode.Space) && charge > 0)
+        {
+
+
+            for (int i = 0; i <= 3; i++)
+            {
+                moduleList[i].GetComponent<KosmModule>().rotSpeed = 300;
+            }
+            charge -= 2;
+        }
+        else
+        {
+            for (int i = 0; i <= 3; i++)
+            {
+                moduleList[i].GetComponent<KosmModule>().rotSpeed = 100;
+            }
+            if (charge < maxCharge) { charge++; }
+        }
+    }
+
+    IEnumerator Flash()
+    {
+        yield return new WaitForSeconds(0.1f);
+        flash.SetActive(true);
+    }
+
+}
